@@ -84,22 +84,18 @@ module RedmineEmailInlineImages
         # need to get this from redmine installation
         path = "/attachments/download"
 
-        issue_description = obj.description
-
         obj.attachments.each do |att|
           if @images.has_value?(att.filename)
             str_r = Regexp.escape("#{@strOpen}#{att.filename}#{@strClose}")
             regex = Regexp.new(str_r)
-            issue_description.scan(regex).each do |match|
-              tmp_desc = issue_description.gsub(match, "#{@strOpen}#{path}/#{att.id}/#{att.filename}#{@strClose}")
-              issue_description = tmp_desc
+            obj.description.scan(regex).each do |match|
+              tmp_desc = obj.description.gsub(match, "#{@strOpen}#{path}/#{att.id}/#{att.filename}#{@strClose}")
+              obj.description = tmp_desc
             end
           end
         end
 
-        obj.description = issue_description
         obj.save!
-
       end
 
       
