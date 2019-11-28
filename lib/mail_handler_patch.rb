@@ -14,7 +14,6 @@ module RedmineEmailInlineImages
       end
     end
 
-
     module InstanceMethods
       private
       @images
