@@ -16,29 +16,26 @@ module RedmineEmailInlineImages
 
     module InstanceMethods
       private
-      @images
-      @strOpen
-      @strClose
-
-      def initialize
-        @images = {}
-        case Setting.text_formatting
-        when 'markdown'
-          @strOpen = "![]("
-          @strClose = ")"
-        when 'textile'
-          @strOpen = "!"
-          @strClose = "!"
-        else
-          @strOpen = ""
-          @strClose = ""
-        end
-      end
+      @reii_images
+      @reii_opentag
+      @reii_closetag
 
       # Overrides the email_parts_to_text method to
       # include inline images from an email for
       # an issue created by an email request
       def email_parts_to_text_with_inline_images(parts)
+        @reii_images = {}
+        case Setting.text_formatting
+        when 'markdown'
+          @reii_opentag = "![]("
+          @reii_closetag = ")"
+        when 'textile'
+          @reii_opentag = "!"
+          @reii_closetag = "!"
+        else
+          @reii_opentag = ""
+          @reii_closetag = ""
+        end
   
         email.all_parts.each do |part|
             if part['Content-ID']
@@ -48,7 +45,7 @@ module RedmineEmailInlineImages
                     content_id = part['Content-ID'].value.gsub(%r{(^<|>$)}, '')
                 end
                 image = part.header['Content-Type'].parameters['name']
-                @images["cid:#{content_id}"] = image
+                @reii_images["cid:#{content_id}"] = image
             end
         end
 
@@ -65,7 +62,7 @@ module RedmineEmailInlineImages
           # replace html images with text bang notation
           # and add them to Hash
           body.scan(/(\[(cid:.*?)\])/).each do |match|
-            tmp_body = body.gsub(match[0], "#{@strOpen}#{@images[match[1]]}#{@strClose}")
+            tmp_body = body.gsub(match[0], "#{@reii_opentag}#{@reii_images[match[1]]}#{@reii_closetag}")
             body = tmp_body
           end
 
@@ -85,17 +82,17 @@ module RedmineEmailInlineImages
         path = "/attachments/download"
 
         obj.attachments.each do |att|
-          if @images.has_value?(att.filename)
-            str_r = Regexp.escape("#{@strOpen}#{att.filename}#{@strClose}")
+          if @reii_images.has_value?(att.filename)
+            str_r = Regexp.escape("#{@reii_opentag}#{att.filename}#{@reii_closetag}")
             regex = Regexp.new(str_r)
             obj.description.scan(regex).each do |match|
-              tmp_desc = obj.description.gsub(match, "#{@strOpen}#{path}/#{att.id}/#{att.filename}#{@strClose}")
+              tmp_desc = obj.description.gsub(match, "#{@reii_opentag}#{path}/#{att.id}/#{att.filename}#{@reii_closetag}")
               obj.description = tmp_desc
             end
           end
         end
 
-        obj.save!
+        obj.save
       end
 
       
