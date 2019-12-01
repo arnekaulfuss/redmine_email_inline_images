@@ -102,6 +102,3 @@ module RedmineEmailInlineImages
     end # module InstanceMethods
   end # module MailHandlerPatch
 end # module RedmineEmailInlineImages
-
-# Add module to MailHandler class
-MailHandler.send(:include, RedmineEmailInlineImages::MailHandlerPatch)

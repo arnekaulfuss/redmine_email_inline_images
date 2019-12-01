@@ -1,6 +1,11 @@
 require 'redmine'
 require 'mail_handler_patch'
 
+# Add module to MailHandler class if not added before
+unless MailHandler.include? RedmineEmailInlineImages::MailHandlerPatch
+  MailHandler.send(:include, RedmineEmailInlineImages::MailHandlerPatch)
+end
+
 Redmine::Plugin.register :redmine_email_inline_images do
   name 'Redmine email inline images plugin'
   author 'credativ Ltd'
